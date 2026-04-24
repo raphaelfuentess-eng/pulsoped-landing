@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulso Pet — Tu mascota nunca está sola</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ════════════════════════════════════════
+       DESIGN TOKENS — Premium Startup
+    ════════════════════════════════════════ */
+    :root {
+      --yellow: #F5C800;
+      --yellow-dark: #C9A400;
+      --yellow-pale: #FFF9D6;
+      --yellow-glow: rgba(245,200,0,0.22);
+      --brown: #2C1E00;
+      --brown-mid: #5A3D00;
+      --brown-light: rgba(44,30,0,0.65);
+      --blue: #1E5FA8;
+      --blue-vivid: #2E7BCC;
+      --blue-light: #93C5FD;
+      --white: #FFFFFF;
+      --surface-glass-light: rgba(255,255,255,0.55);
+      --surface-glass-dark: rgba(44,30,0,0.45);
+      --border-light: rgba(255,255,255,0.18);
+      --border-yellow: rgba(245,200,0,0.22);
+
+      /* Shadows — layered for depth */
+      --shadow-card: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.10);
+      --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.10), 0 20px 56px rgba(0,0,0,0.18);
+      --shadow-btn: 0 2px 8px rgba(44,30,0,0.20), 0 4px 20px rgba(44,30,0,0.15);
+      --shadow-btn-hover: 0 6px 24px rgba(44,30,0,0.35), 0 2px 8px rgba(44,30,0,0.15);
+      --shadow-glow-yellow: 0 0 40px rgba(245,200,0,0.30), 0 8px 32px rgba(245,200,0,0.15);
+
+      /* Radii */
+      --r-sm: 10px;
+      --r-md: 18px;
+      --r-lg: 28px;
+      --r-xl: 40px;
+      --r-pill: 100px;
+
+      /* Transitions */
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      --t-fast: 200ms;
+      --t-mid: 320ms;
+      --t-slow: 520ms;
+    }
+
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+      background: var(--brown);
+      -webkit-font-smoothing: antialiased;
+      cursor: default;
+    }
+
+    /* ── CUSTOM SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--brown); }
+    ::-webkit-scrollbar-thumb { background: var(--yellow-dark); border-radius: 4px; }
+
+    /* ── NAV DOTS — Premium floating pill ── */
+    .nav-dots {
+      position: fixed;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: var(--r-pill);
+      padding: 12px 8px;
+      box-shadow: var(--shadow-card);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all var(--t-mid) var(--ease-spring);
+      border: none;
+    }
+    .dot:hover { background: rgba(255,255,255,0.55); transform: scale(1.2); }
+    .dot.active {
+      background: var(--yellow);
+      transform: scale(1.15);
+      box-shadow: 0 0 10px var(--yellow-glow);
+    }
+
+    /* ── SLIDE BASE ── */
+    .slide {
+      height: 100vh;
+      width: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 5rem clamp(2rem, 7vw, 7rem) 3rem;
+    }
+
+    /* ── LOGO MARK ── */
+    .logo-mark {
+      position: absolute;
+      top: 28px;
+      left: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: var(--brown);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: var(--shadow-card);
+      transition: transform var(--t-fast) var(--ease-spring);
+    }
+    .logo-icon:hover { transform: scale(1.08) rotate(-4deg); }
+    .logo-icon.light { background: var(--yellow); }
+    .logo-label {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--brown);
+      letter-spacing: -0.01em;
+    }
+    .logo-label.light { color: var(--yellow); }
+
+    /* ── SLIDE NUMBER ── */
+    .slide-num {
+      position: absolute;
+      bottom: 28px;
+      right: 44px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      opacity: 0.28;
+      color: inherit;
+      text-transform: uppercase;
+    }
+
+    /* ══════════════════════════════
+       SLIDE 1 — HERO
+    ══════════════════════════════ */
+    #slide-1 {
+      background: var(--yellow);
+      flex-direction: column;
+      text-align: center;
+    }
+
+    /* Layered mesh background */
+    #slide-1::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 65% 55% at 85% 15%, rgba(255,255,255,0.32) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 15% 85%, rgba(44,30,0,0.08) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* Giant decorative paw */
+    #slide-1::after {
+      content: '🐾';
+      position: absolute;
+      font-size: clamp(24vw, 30vw, 380px);
+      opacity: 0.055;
+      right: -3vw;
+      bottom: -5vw;
+      pointer-events: none;
+      user-select: none;
+      transform: rotate(-15deg);
+      transition: transform 8s ease;
+    }
+
+    .slide-1-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 840px;
+    }
+
+    .s1-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--brown);
+      color: var(--yellow);
+      border-radius: var(--r-pill);
+      padding: 0.45rem 1.2rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      margin-bottom: 2.2rem;
+      animation: fadeSlideUp 0.8s var(--ease-smooth) both;
+      box-shadow: var(--shadow-btn);
+    }
+    .pulse-dot {
+      width: 7px; height: 7px;
+      background: var(--yellow);
+      border-radius: 50%;
+      animation: pulseDot 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulseDot {
+      0%,100% { opacity:1; transform:scale(1); box-shadow: 0 0 0 0 rgba(245,200,0,0.5); }
+      50% { opacity:0.6; transform:scale(1.3); box-shadow: 0 0 0 5px rgba(245,200,0,0); }
+    }
+
+    .s1-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 6.2vw, 5.6rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      color: var(--brown);
+      margin-bottom: 1.6rem;
+      animation: fadeSlideUp 0.8s 0.12s var(--ease-smooth) both;
+    }
+    .s1-title .accent {
+      color: var(--blue);
+      position: relative;
+    }
+
+    .s1-sub {
+      font-size: clamp(1rem, 1.9vw, 1.22rem);
+      font-weight: 300;
+      color: var(--brown-mid);
+      max-width: 500px;
+      margin: 0 auto 3rem;
+      line-height: 1.72;
+      animation: fadeSlideUp 0.8s 0.22s var(--ease-smooth) both;
+    }
+
+    .s1-cta-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeSlideUp 0.8s 0.32s var(--ease-smooth) both;
+    }
+
+    /* ── BUTTONS — Premium ── */
+    .btn-yellow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--brown);
+      color: var(--yellow);
+      border: none;
+      border-radius: var(--r-md);
+      padding: 1rem 2.2rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--t-fast) var(--ease-spring),
+                  box-shadow var(--t-fast) var(--ease-smooth),
+                  background var(--t-fast);
+      box-shadow: var(--shadow-btn);
+      letter-spacing: -0.01em;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-yellow::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+    .btn-yellow:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-btn-hover);
+      background: #1a0d00;
+    }
+    .btn-yellow:active { transform: translateY(-1px) scale(0.99); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(44,30,0,0.06);
+      color: var(--brown);
+      border: 1.5px solid rgba(44,30,0,0.22);
+      border-radius: var(--r-md);
+      padding: 1rem 2.2rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all var(--t-fast) var(--ease-smooth);
+      letter-spacing: -0.01em;
+    }
+    .btn-ghost:hover {
+      background: var(--brown);
+      color: var(--yellow);
+      border-color: var(--brown);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-btn);
+    }
+    .btn-ghost:active { transform: translateY(-1px); }
+
+    /* ══════════════════════════════
+       SLIDE 2 — PROBLEMA
+    ══════════════════════════════ */
+    #slide-2 {
+      background: var(--brown);
+      flex-direction: column;
+      text-align: center;
+    }
+    #slide-2::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(245,200,0,0.055) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 90% 90%, rgba(46,107,180,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .s2-inner { position: relative; z-index: 1; max-width: 960px; width: 100%; }
+
+    .slide-label {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1.1rem;
+    }
+    .slide-label.yellow { color: var(--yellow); }
+    .slide-label.blue { color: var(--blue-light); }
+
+    .s2-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4.8vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 3rem;
+    }
+    .s2-title .hl { color: var(--yellow); }
+
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.1rem;
+    }
+
+    .pain-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(245,200,0,0.14);
+      border-radius: var(--r-lg);
+      padding: 2rem 1.6rem;
+      text-align: left;
+      transition:
+        background var(--t-mid) var(--ease-smooth),
+        transform var(--t-mid) var(--ease-spring),
+        border-color var(--t-mid),
+        box-shadow var(--t-mid);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+    .pain-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(245,200,0,0.04) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity var(--t-mid);
+      border-radius: inherit;
+    }
+    .pain-card:hover {
+      background: rgba(245,200,0,0.07);
+      border-color: rgba(245,200,0,0.30);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card-hover);
+    }
+    .pain-card:hover::before { opacity: 1; }
+
+    .pain-emoji {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      display: block;
+      transition: transform var(--t-mid) var(--ease-spring);
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    }
+    .pain-card:hover .pain-emoji { transform: scale(1.15) rotate(-5deg); }
+
+    .pain-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--yellow);
+      margin-bottom: 0.55rem;
+      letter-spacing: -0.01em;
+    }
+    .pain-card p {
+      font-size: 0.86rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.62;
+      font-weight: 300;
+    }
+
+    /* ══════════════════════════════
+       SLIDE 3 — SOLUCIÓN
+    ══════════════════════════════ */
+    #slide-3 {
+      background: var(--yellow);
+    }
+    #slide-3::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 5% 50%, rgba(255,255,255,0.28) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 50% at 95% 20%, rgba(44,30,0,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .s3-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+      max-width: 1120px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .s3-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4.2vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--brown);
+      margin-bottom: 1.4rem;
+    }
+    .s3-title .blue { color: var(--blue); }
+
+    .s3-desc {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--brown-mid);
+      line-height: 1.75;
+      margin-bottom: 2.2rem;
+    }
+
+    .tech-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+    .pill {
+      background: var(--brown);
+      color: var(--yellow);
+      border-radius: var(--r-pill);
+      padding: 0.4rem 1rem;
+      font-size: 0.79rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-fast);
+      cursor: default;
+    }
+    .pill:hover { transform: translateY(-2px) scale(1.03); box-shadow: var(--shadow-btn); }
+
+    /* App Mockup */
+    .s3-right { position: relative; }
+
+    .app-screen {
+      background: linear-gradient(160deg, #2C1E00 0%, #1a1000 100%);
+      border-radius: var(--r-xl);
+      padding: 2rem 1.75rem 2.2rem;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(245,200,0,0.12),
+        0 24px 80px rgba(44,30,0,0.45),
+        0 4px 20px rgba(44,30,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Floating glow behind mockup */
+    .s3-right::before {
+      content: '';
+      position: absolute;
+      width: 80%; height: 80%;
+      background: radial-gradient(ellipse, rgba(245,200,0,0.18) 0%, transparent 70%);
+      bottom: -20%;
+      left: 10%;
+      filter: blur(32px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(245,200,0,0.10);
+    }
+    .app-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      color: var(--yellow);
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .app-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.25);
+      border-radius: var(--r-sm);
+      padding: 0.28rem 0.7rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #4ade80;
+      letter-spacing: 0.04em;
+    }
+    .status-blink {
+      width: 6px; height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: blink 1.6s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity:1; } 50% { opacity: 0.25; }
+    }
+
+    .app-pet-state {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(245,200,0,0.10);
+      border-radius: var(--r-md);
+      padding: 1.25rem;
+      margin-bottom: 0.85rem;
+      transition: background var(--t-fast);
+    }
+    .app-pet-state:hover { background: rgba(245,200,0,0.06); }
+    .app-pet-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: rgba(245,200,0,0.45);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .app-pet-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--yellow);
+      letter-spacing: -0.01em;
+    }
+
+    .app-alerts { display: flex; flex-direction: column; gap: 0.55rem; }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--r-sm);
+      padding: 0.7rem 0.95rem;
+      transition: background var(--t-fast), transform var(--t-fast);
+    }
+    .alert-item:hover { background: rgba(255,255,255,0.065); transform: translateX(3px); }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .alert-dot.green { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+    .alert-dot.amber { background: var(--yellow); box-shadow: 0 0 6px var(--yellow-glow); }
+    .alert-text { font-size: 0.78rem; color: rgba(255,255,255,0.72); font-weight: 400; }
+    .alert-time { font-size: 0.66rem; color: rgba(255,255,255,0.25); margin-left: auto; white-space: nowrap; }
+
+    /* ══════════════════════════════
+       SLIDE 4 — BENEFICIOS
+    ══════════════════════════════ */
+    #slide-4 {
+      background: linear-gradient(145deg, #1347A0 0%, #0e3878 55%, #0a2655 100%);
+      flex-direction: column;
+      text-align: center;
+    }
+    #slide-4::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 55% 55% at 8% 90%, rgba(245,200,0,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 45% at 92% 8%, rgba(255,255,255,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .s4-inner { position: relative; z-index: 1; max-width: 1080px; width: 100%; }
+
+    .s4-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.9rem, 4.2vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+      line-height: 1.1;
+    }
+    .s4-title .yellow { color: var(--yellow); }
+
+    .s4-sub {
+      font-size: 1rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 3.2rem;
+      letter-spacing: 0.01em;
+    }
+
+    .benefit-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.4rem;
+    }
+
+    .benefit-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: var(--r-lg);
+      padding: 2.4rem 2rem 2.2rem;
+      text-align: left;
+      transition:
+        transform var(--t-mid) var(--ease-spring),
+        background var(--t-mid),
+        border-color var(--t-mid),
+        box-shadow var(--t-mid);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Top gradient line */
+    .benefit-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--yellow), transparent);
+      opacity: 0;
+      transition: opacity var(--t-mid);
+    }
+
+    /* Bottom glow on hover */
+    .benefit-card::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 80px;
+      background: radial-gradient(ellipse, rgba(245,200,0,0.15) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity var(--t-mid);
+      pointer-events: none;
+    }
+
+    .benefit-card:hover {
+      transform: translateY(-8px);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(245,200,0,0.25);
+      box-shadow: var(--shadow-card-hover), 0 0 40px rgba(46,107,180,0.15);
+    }
+    .benefit-card:hover::before { opacity: 1; }
+    .benefit-card:hover::after { opacity: 1; }
+
+    .benefit-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.8rem;
+      font-weight: 800;
+      color: rgba(245,200,0,0.10);
+      line-height: 1;
+      margin-bottom: 1.4rem;
+      letter-spacing: -0.04em;
+      transition: color var(--t-mid);
+    }
+    .benefit-card:hover .benefit-num { color: rgba(245,200,0,0.20); }
+
+    .benefit-icon-wrap {
+      width: 56px; height: 56px;
+      background: rgba(245,200,0,0.12);
+      border: 1px solid rgba(245,200,0,0.18);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.65rem;
+      margin-bottom: 1.3rem;
+      transition: transform var(--t-fast) var(--ease-spring), background var(--t-fast);
+      box-shadow: 0 4px 16px rgba(245,200,0,0.08);
+    }
+    .benefit-card:hover .benefit-icon-wrap {
+      transform: scale(1.1) rotate(-4deg);
+      background: rgba(245,200,0,0.20);
+    }
+
+    .benefit-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--yellow);
+      margin-bottom: 0.7rem;
+      letter-spacing: -0.01em;
+    }
+    .benefit-card p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.60);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* ══════════════════════════════
+       SLIDE 5 — CTA FINAL
+    ══════════════════════════════ */
+    #slide-5 {
+      background: var(--yellow);
+      flex-direction: column;
+      text-align: center;
+    }
+    #slide-5::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 70% at 90% 100%, rgba(44,30,0,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 60% at 10% 0%, rgba(255,255,255,0.35) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    .s5-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 580px;
+      width: 100%;
+    }
+
+    .s5-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--brown);
+      color: var(--yellow);
+      padding: 0.45rem 1.2rem;
+      border-radius: var(--r-pill);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-btn);
+    }
+
+    .s5-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 4.8vw, 4rem);
+      font-weight: 800;
+      color: var(--brown);
+      letter-spacing: -0.035em;
+      line-height: 1.07;
+      margin-bottom: 1.1rem;
+    }
+
+    .s5-counter {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 400;
+      color: var(--brown-mid);
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .s5-counter strong {
+      font-family: 'Syne', sans-serif;
+      color: var(--brown);
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    /* Avatar stack */
+    .avatar-stack {
+      display: flex;
+      align-items: center;
+    }
+    .av {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--yellow);
+      background: var(--brown);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      margin-left: -8px;
+      box-shadow: 0 0 0 1px var(--yellow);
+      transition: transform var(--t-fast) var(--ease-spring);
+    }
+    .av:first-child { margin-left: 0; }
+    .av:hover { transform: translateY(-3px) scale(1.1); z-index: 5; }
+
+    /* Form Card */
+    .form-card {
+      background: linear-gradient(160deg, #2C1E00 0%, #1a1000 100%);
+      border-radius: var(--r-xl);
+      padding: 2.2rem 2rem;
+      box-shadow:
+        0 0 0 1px rgba(245,200,0,0.14),
+        0 24px 60px rgba(44,30,0,0.35),
+        0 4px 16px rgba(44,30,0,0.20);
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,200,0,0.35), transparent);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--r-md);
+      border: 1px solid rgba(245,200,0,0.16);
+      background: rgba(245,200,0,0.05);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.94rem;
+      color: var(--yellow);
+      outline: none;
+      transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+    }
+    .input-field::placeholder { color: rgba(245,200,0,0.30); }
+    .input-field:focus {
+      border-color: rgba(245,200,0,0.55);
+      background: rgba(245,200,0,0.09);
+      box-shadow: 0 0 0 3px rgba(245,200,0,0.10);
+    }
+
+    .btn-submit-full {
+      width: 100%;
+      padding: 1.05rem;
+      background: linear-gradient(135deg, var(--yellow) 0%, var(--yellow-dark) 100%);
+      color: var(--brown);
+      border: none;
+      border-radius: var(--r-md);
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-fast);
+      letter-spacing: -0.01em;
+      box-shadow: 0 2px 12px rgba(245,200,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-submit-full::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-submit-full:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-glow-yellow);
+    }
+    .btn-submit-full:active { transform: translateY(-1px); }
+
+    .form-note {
+      font-size: 0.73rem;
+      color: rgba(245,200,0,0.35);
+      margin-top: 0.85rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* Success */
+    .success-box {
+      display: none;
+      background: rgba(44,30,0,0.07);
+      border: 1px solid rgba(44,30,0,0.15);
+      border-radius: var(--r-xl);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .success-box.show {
+      display: block;
+      animation: successPop 0.5s var(--ease-spring) both;
+    }
+    @keyframes successPop {
+      from { opacity: 0; transform: scale(0.88) translateY(12px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .success-emoji {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+      animation: bounceIn 0.6s 0.1s var(--ease-spring) both;
+    }
+    @keyframes bounceIn {
+      from { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    .success-box h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--brown);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .success-box p { font-size: 0.9rem; color: var(--brown-mid); line-height: 1.6; }
+
+    /* ══════════════════════════════
+       SCROLL REVEAL ANIMATIONS
+    ══════════════════════════════ */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideLeft {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--t-slow) var(--ease-smooth),
+        transform var(--t-slow) var(--ease-smooth);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.17s; }
+    .reveal-delay-3 { transition-delay: 0.26s; }
+    .reveal-delay-4 { transition-delay: 0.35s; }
+
+    /* Slide number per context */
+    #slide-1 .slide-num,
+    #slide-3 .slide-num,
+    #slide-5 .slide-num { color: var(--brown-mid); }
+    #slide-2 .slide-num  { color: rgba(245,200,0,0.22); }
+    #slide-4 .slide-num  { color: rgba(255,255,255,0.20); }
+
+    /* ══════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════ */
+    @media (max-width: 900px) {
+      .pain-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .s3-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+      .s3-right { display: none; }
+      .benefit-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .benefit-card { padding: 1.6rem 1.4rem; }
+      .benefit-num { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .nav-dots { display: none; }
+      .slide { padding: 5rem 1.5rem 3rem; }
+    }
+    @media (max-width: 560px) {
+      .pain-grid { grid-template-columns: 1fr; }
+      .s1-cta-row { flex-direction: column; align-items: center; }
+      .s1-cta-row button { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV DOTS -->
+<nav class="nav-dots" id="navDots">
+  <div class="dot active" onclick="goToSlide(0)" title="Inicio"></div>
+  <div class="dot" onclick="goToSlide(1)" title="Problema"></div>
+  <div class="dot" onclick="goToSlide(2)" title="Solución"></div>
+  <div class="dot" onclick="goToSlide(3)" title="Beneficios"></div>
+  <div class="dot" onclick="goToSlide(4)" title="Registro"></div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     SLIDE 1 — HERO
+══════════════════════════════════════ -->
+<section class="slide" id="slide-1">
+  <div class="logo-mark">
+    <div class="logo-icon"><span>🐾</span></div>
+    <span class="logo-label">Pulso Pet</span>
+  </div>
+
+  <div class="slide-1-inner">
+    <div class="s1-eyebrow">
+      <span class="pulse-dot"></span>
+      Para dueños que los quieren como familia
+    </div>
+
+    <h1 class="s1-title">
+      Salí tranquilo.<br><span class="accent">Tu compañero<br>no está solo.</span>
+    </h1>
+
+    <p class="s1-sub">
+      Sabés ese nudo en el estómago cuando cerrás la puerta y los dejás? Con Pulso Pet, te vas a trabajar sabiendo que alguien los cuida.
+    </p>
+
+    <div class="s1-cta-row">
+      <button class="btn-yellow" onclick="goToSlide(4)">Quiero esa tranquilidad →</button>
+      <button class="btn-ghost" onclick="goToSlide(1)">Ver cómo funciona</button>
+    </div>
+  </div>
+
+  <span class="slide-num">01 / 05</span>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 2 — PROBLEMA
+══════════════════════════════════════ -->
+<section class="slide" id="slide-2">
+  <div class="logo-mark">
+    <div class="logo-icon light"><span>🐾</span></div>
+    <span class="logo-label light">Pulso Pet</span>
+  </div>
+
+  <div class="s2-inner">
+    <p class="slide-label yellow reveal">Algo que todos los dueños conocen</p>
+    <h2 class="s2-title reveal reveal-delay-1">
+      Cada mañana te vas<br>preguntando: <span class="hl">¿estará bien?</span>
+    </h2>
+
+    <div class="pain-grid">
+      <div class="pain-card reveal reveal-delay-1">
+        <span class="pain-emoji">💔</span>
+        <h3>La culpa que no se va</h3>
+        <p>Cerrás la puerta y sentís que los estás abandonando. Aunque sepas que no es así.</p>
+      </div>
+      <div class="pain-card reveal reveal-delay-2">
+        <span class="pain-emoji">😶‍🌫️</span>
+        <h3>Trabajar sin poder concentrarte</h3>
+        <p>Tu cabeza está en la reunión, pero tu corazón sigue en casa preguntándose qué está haciendo.</p>
+      </div>
+      <div class="pain-card reveal reveal-delay-3">
+        <span class="pain-emoji">😰</span>
+        <h3>El miedo al "¿qué pasó?"</h3>
+        <p>Llegás a casa y encontrás algo roto, algo comido, o peor. Y no había manera de saberlo antes.</p>
+      </div>
+      <div class="pain-card reveal reveal-delay-4">
+        <span class="pain-emoji">🫠</span>
+        <h3>No tener a nadie de confianza</h3>
+        <p>Los paseadores son caros. Las cámaras no entienden. No hay nadie que realmente los cuide.</p>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-num">02 / 05</span>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 3 — SOLUCIÓN
+══════════════════════════════════════ -->
+<section class="slide" id="slide-3">
+  <div class="logo-mark">
+    <div class="logo-icon"><span>🐾</span></div>
+    <span class="logo-label">Pulso Pet</span>
+  </div>
+
+  <div class="s3-layout">
+    <div class="s3-left">
+      <p class="slide-label blue reveal">Lo que cambia con Pulso Pet</p>
+      <h2 class="s3-title reveal reveal-delay-1">
+        La primera vez que<br>te fuiste sin<br><span class="blue">sentir culpa.</span>
+      </h2>
+      <p class="s3-desc reveal reveal-delay-2">
+        Pulso Pet está con ellos cuando vos no podés. Observa, entiende y te avisa solo si algo necesita tu atención. El resto del tiempo, simplemente te deja vivir tranquilo.
+      </p>
+      <div class="tech-pills reveal reveal-delay-3">
+        <span class="pill">Ve lo que pasa</span>
+        <span class="pill">Entiende cómo se siente</span>
+        <span class="pill">Te avisa si algo no está bien</span>
+        <span class="pill">Resumen al final del día</span>
+      </div>
+    </div>
+
+    <div class="s3-right reveal reveal-delay-2">
+      <div class="app-screen">
+        <div class="app-header">
+          <span class="app-logo">Pulso Pet</span>
+          <span class="app-status"><span class="status-blink"></span> En vivo</span>
+        </div>
+
+        <div class="app-pet-state">
+          <div class="app-pet-label">Estado actual</div>
+          <div class="app-pet-value">😌 Tranquilo</div>
+        </div>
+
+        <div class="app-pet-state" style="margin-bottom:1rem;">
+          <div class="app-pet-label">Actividad del día</div>
+          <div class="app-pet-value" style="font-size:1.1rem;display:flex;align-items:center;gap:0.5rem;">
+            <span>12h dormido</span>
+            <span style="color:rgba(245,200,0,0.4);font-size:0.8rem;">· Normal</span>
+          </div>
+        </div>
+
+        <div class="app-alerts">
+          <div class="alert-item">
+            <div class="alert-dot green"></div>
+            <span class="alert-text">Mochi está tranquilo 😌</span>
+            <span class="alert-time">Ahora</span>
+          </div>
+          <div class="alert-item">
+            <div class="alert-dot amber"></div>
+            <span class="alert-text">Estaba inquieto · lo viste en cámara</span>
+            <span class="alert-time">10:32</span>
+          </div>
+          <div class="alert-item">
+            <div class="alert-dot green"></div>
+            <span class="alert-text">Comió bien esta mañana 🍽️</span>
+            <span class="alert-time">08:15</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-num">03 / 05</span>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 4 — BENEFICIOS
+══════════════════════════════════════ -->
+<section class="slide" id="slide-4">
+  <div class="logo-mark">
+    <div class="logo-icon light"><span>🐾</span></div>
+    <span class="logo-label light">Pulso Pet</span>
+  </div>
+
+  <div class="s4-inner">
+    <p class="slide-label blue reveal" style="color:rgba(255,255,255,0.5);">Lo que vas a sentir</p>
+    <h2 class="s4-title reveal reveal-delay-1">
+      Trabajar con la mente<br>en el trabajo, <span class="yellow">no en casa.</span>
+    </h2>
+    <p class="s4-sub reveal reveal-delay-2">Tres momentos en los que Pulso Pet te cambia el día.</p>
+
+    <div class="benefit-grid">
+      <div class="benefit-card reveal reveal-delay-1">
+        <div class="benefit-num">01</div>
+        <div class="benefit-icon-wrap">🔔</div>
+        <h3>Si algo pasa, lo sabés al toque</h3>
+        <p>No llegás a casa a descubrir qué pasó. Pulso Pet te avisa en el momento, para que puedas actuar — o simplemente respirar tranquilo.</p>
+      </div>
+
+      <div class="benefit-card reveal reveal-delay-2">
+        <div class="benefit-num">02</div>
+        <div class="benefit-icon-wrap">🐶</div>
+        <h3>Lo ves cuando más lo necesitás</h3>
+        <p>Con un tap, la cámara te muestra qué está haciendo. Nada de imaginar. Nada de angustiarte. Solo verlos y seguir con tu día.</p>
+      </div>
+
+      <div class="benefit-card reveal reveal-delay-3">
+        <div class="benefit-num">03</div>
+        <div class="benefit-icon-wrap">🌙</div>
+        <h3>Llegás a casa sin sorpresas</h3>
+        <p>Al final del día recibís un resumen completo. Cómo durmió, cuánto se movió, cómo se sintió. Ya conocés su día antes de abrir la puerta.</p>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-num">04 / 05</span>
+</section>
+
+<!-- ══════════════════════════════════════
+     SLIDE 5 — CTA FINAL
+══════════════════════════════════════ -->
+<section class="slide" id="slide-5">
+  <div class="logo-mark">
+    <div class="logo-icon"><span>🐾</span></div>
+    <span class="logo-label">Pulso Pet</span>
+  </div>
+
+  <div class="s5-inner">
+    <div class="s5-badge">
+      <span>🐾</span> Primeros 200 dueños · Acceso gratuito
+    </div>
+
+    <h2 class="s5-title reveal">
+      Ellos te esperan.<br>Vos podés irte<br>tranquilo.
+    </h2>
+
+    <p class="s5-counter reveal reveal-delay-1">
+      <div class="avatar-stack">
+        <div class="av">🐕</div><div class="av">🐈</div><div class="av">🐾</div><div class="av">🐩</div>
+      </div>
+      &nbsp;<strong id="liveCount">120</strong>+ dueños ya reservaron su lugar
+    </p>
+
+    <!-- Form -->
+    <div class="form-card reveal reveal-delay-2" id="formCard">
+      <div class="form-row">
+        <input class="input-field" type="text" id="fname" placeholder="Tu nombre" autocomplete="given-name" />
+        <input class="input-field" type="email" id="femail" placeholder="Tu email" autocomplete="email" />
+      </div>
+      <button class="btn-submit-full" onclick="handleRegister()">
+        Quiero saber cuando esté listo 🐾
+      </button>
+      <p class="form-note">Sin spam. Sin costo. Te avisamos y listo.</p>
+    </div>
+
+    <!-- Success -->
+    <div class="success-box" id="successBox">
+      <span class="success-emoji">🐾</span>
+      <h3>¡Ya estás en la lista!</h3>
+      <p>Te vamos a avisar cuando Pulso Pet esté listo.<br>Ellos tienen suerte de tenerte.</p>
+    </div>
+  </div>
+
+  <span class="slide-num">05 / 05</span>
+</section>
+
+<script>
+  // ── SLIDE NAVIGATION ──
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dots = Array.from(document.querySelectorAll('.dot'));
+
+  function goToSlide(index) {
+    slides[index].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Update dots on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = slides.indexOf(entry.target);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // ── REVEAL ON SCROLL ──
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+  // ── FORM HANDLER ──
+  let count = 120;
+
+  function handleRegister() {
+    const name = document.getElementById('fname').value.trim();
+    const email = document.getElementById('femail').value.trim();
+
+    if (!name) {
+      shake(document.getElementById('fname'));
+      return;
+    }
+    if (!email || !email.includes('@')) {
+      shake(document.getElementById('femail'));
+      return;
+    }
+
+    count++;
+    document.getElementById('liveCount').textContent = count;
+
+    console.log('🐾 Pulso Pet — Nuevo registro:', { name, email, timestamp: new Date().toISOString() });
+
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('successBox').classList.add('show');
+  }
+
+  function shake(el) {
+    el.style.borderColor = '#ef4444';
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = 'shakeEl 0.35s ease';
+    setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 800);
+  }
+
+  // Inline shake keyframe
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shakeEl {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-6px); }
+      40%,80% { transform: translateX(6px); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Keyboard nav
+  document.addEventListener('keydown', (e) => {
+    const current = slides.findIndex(s => {
+      const rect = s.getBoundingClientRect();
+      return rect.top >= -10 && rect.top < window.innerHeight / 2;
+    });
+    if (e.key === 'ArrowDown' && current < slides.length - 1) goToSlide(current + 1);
+    if (e.key === 'ArrowUp' && current > 0) goToSlide(current - 1);
+  });
+</script>
+</body>
+</html>
